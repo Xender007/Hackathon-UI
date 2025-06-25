@@ -1,0 +1,122 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #0d0d0d;
+  color: white;
+  padding: 10px 20px;
+  position: relative;
+  z-index: 1002;
+}
+
+.header-left,
+.header-center,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-text {
+  font-size: 20px;
+  font-weight: bold;
+  color: #facc15;
+}
+
+.menu-btn {
+  font-size: 20px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.language-select {
+  background: #1e1e1e;
+  color: white;
+  border: 1px solid #444;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.search-box {
+  padding: 6px 10px;
+  width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-btn {
+  background-color: #007acc;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.notification-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+}
+
+.user-avatar {
+  height: 32px;
+  width: 32px;
+  background-color: #4c8bf5;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  position: fixed;
+  top: 15px;
+  left: -260px;
+  width: 240px;
+  height: 100%;
+  background-color: #1e1e1e;
+  color: white;
+  padding: 20px;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.4);
+  z-index: 1001;
+  transition: left 0.3s ease;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: 12px 0;
+  font-size: 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #333;
+}
+
+.sidebar li:hover {
+  background-color: #292929;
+}
+
+/* Overlay behind sidebar */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}

@@ -1,0 +1,45 @@
+<section class="module-section">
+  <h2 class="section-title">Week 1 Modules</h2>
+
+  <div class="scroll-wrapper" (mouseenter)="showArrows = true" (mouseleave)="showArrows = false">
+    <button
+      class="scroll-btn left"
+      *ngIf="showArrows && showLeftArrow"
+      (click)="scrollLeft()"
+      [disabled]="!showLeftArrow"
+    >
+      ❮
+    </button>
+
+    <div #scrollContainer class="scroll-container" (scroll)="onScroll()">
+      <div class="module-card" *ngFor="let module of modules">
+        <img [src]="module.image" alt="Module" class="card-image" />
+        <div class="card-content">
+          <div class="card-meta">
+            <span class="level">{{ module.level }}</span>
+            <span class="duration">{{ module.duration }}</span>
+          </div>
+          <h3 class="card-title">{{ module.title }}</h3>
+          <p class="card-desc">{{ module.description }}</p>
+          <div class="card-footer">
+            <span class="type">{{ module.type }}</span>
+            <span class="rating">⭐ {{ module.rating }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button
+      class="scroll-btn right"
+      *ngIf="showArrows && showRightArrow"
+      (click)="scrollRight()"
+      [disabled]="!showRightArrow"
+    >
+      ❯
+    </button>
+  </div>
+
+  <div class="view-all-wrapper">
+    <button class="view-all-btn">View All Modules</button>
+  </div>
+</section>

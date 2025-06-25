@@ -1,0 +1,10 @@
+/* You can add global styles to this file, and also import other style files */
+body {
+  margin: 0;
+  background-color: #f0f2f5; /* light gray background */
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.main-content {
+  padding: 0 32px 80px;
+}

@@ -1,0 +1,7 @@
+ <div *ngIf="!isAuthenticated">
+      <button (click)="login()">Login with Microsoft</button>
+    </div>
+    <div *ngIf="isAuthenticated">
+      <p>Welcome, {{ userName }}</p>
+      <button (click)="logout()">Logout</button>
+</div>
