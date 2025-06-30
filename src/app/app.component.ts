@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -8,4 +9,10 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'hackathon-ui-final';
+
+  constructor(public router: Router) {}
+  
+  isFileUploadRoute(): boolean {
+    return this.router.url === '/file/upload';
+  }
 }
