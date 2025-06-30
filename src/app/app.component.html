@@ -1,11 +1,17 @@
 <app-header></app-header>
 
-<main class="main-content">
-  <app-hero-banner></app-hero-banner>
+<!-- Show only header during /file/upload -->
+<ng-container *ngIf="!isFileUploadRoute()">
+  <main class="main-content">
+    <app-hero-banner></app-hero-banner>
+    <app-module-cards></app-module-cards>
+    <router-outlet></router-outlet>
+  </main>
 
-  <app-module-cards></app-module-cards>
+  <app-chatbot></app-chatbot>
+</ng-container>
 
+<!-- This outlet ensures /file/upload still loads -->
+<ng-container *ngIf="isFileUploadRoute()">
   <router-outlet></router-outlet>
-</main>
-
-<app-chatbot></app-chatbot>
+</ng-container>
