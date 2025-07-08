@@ -11,7 +11,7 @@ import { HeroBannerComponent } from './hero-banner/hero-banner.component';
 import { ModuleCardsComponent } from './module-cards/module-cards.component';
 import { LoginUploadComponent } from './login-upload/login-upload.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -23,6 +23,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { HttpClientModule } from '@angular/common/http';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
   declarations: [
@@ -41,6 +42,7 @@ import { HttpClientModule } from '@angular/common/http';
     HttpClientModule,
     BrowserAnimationsModule,
     FormsModule,
+    ReactiveFormsModule,
     MatTableModule,
     MatFormFieldModule,
     MatSelectModule,
@@ -50,6 +52,7 @@ import { HttpClientModule } from '@angular/common/http';
     MatDividerModule,
     MatPaginatorModule,
     MatSortModule,
+    MatTooltipModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
