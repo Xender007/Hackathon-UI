@@ -9,7 +9,7 @@ const routes: Routes = [
   { path: 'chatbot', component: ChatbotComponent },
   { path: 'login', component: AdminLoginComponent },
   { path: 'file/upload', component: LoginUploadComponent },
-  { path: '', redirectTo: '/login', pathMatch: 'full' }  
+  { path: '', redirectTo: '/chatbot', pathMatch: 'full' }  
 ];
 
 @NgModule({

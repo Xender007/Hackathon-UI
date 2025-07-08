@@ -1,6 +1,5 @@
 <!-- Chatbot Floating Panel -->
 <div class="chatbot-wrapper" [class.hidden]="isMinimized">
-  <!-- Header -->
   <div class="chatbot-header" (click)="toggleChat()">
     <span class="chatbot-title">Charter Chatbot</span>
     <span class="chatbot-toggle-icon">
@@ -13,9 +12,7 @@
     </span>
   </div>
 
-  <!-- Body (Deep Chat goes here) -->
   <div id="chatbot-container" class="chatbot-body"></div>
 </div>
 
-<!-- Floating Chat Icon -->
 <div class="chatbot-float-icon" *ngIf="isMinimized" (click)="toggleChat()">🤖</div>

@@ -26,10 +26,8 @@
 <!-- Sidebar -->
 <nav class="sidebar" [class.open]="isSidebarOpen">
   <ul>
-    <li (click)="closeSidebar()">🏠 Home</li>
-    <li (click)="closeSidebar()">📚 Modules</li>
-    <li (click)="closeSidebar()">👤 Profile</li>
-    <li (click)="closeSidebar()">⚙️ Settings</li>
-    <li (click)="closeSidebar()">🚪 Logout</li>
+    <li *ngFor="let item of menuItems" (click)="routeTo(item.label)">
+      {{ item.icon }} {{ item.label }}
+    </li>
   </ul>
 </nav>

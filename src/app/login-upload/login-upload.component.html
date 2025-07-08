@@ -1,84 +1,114 @@
-<div class="upload-container">
-  <h2>Upload File</h2>
+<div class="upload-wrapper">
+  <mat-card class="upload-card">
+    <h2 class="text-center">Upload File</h2>
 
-  <mat-form-field appearance="fill">
-    <mat-label>Upload Type</mat-label>
-    <mat-select [(value)]="uploadType">
-      <mat-option value="file">File</mat-option>
-      <mat-option value="link">Link</mat-option>
-    </mat-select>
-  </mat-form-field>
-
-  <!-- Upload by file -->
-  <div *ngIf="uploadType === 'file'">
-    <input #fileInput type="file" (change)="onFileSelected($event)" />
-    <button mat-raised-button color="primary" (click)="upload(fileInput)">Upload</button>
-  </div>
-
-  <!-- Upload by link -->
-  <div *ngIf="uploadType === 'link'">
-    <mat-form-field appearance="fill">
-      <mat-label>Paste Link</mat-label>
-      <input matInput [(ngModel)]="uploadedLink" placeholder="Enter file URL" />
+    <!-- Step 1: Choose Upload Type -->
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Upload Type</mat-label>
+      <mat-select [(value)]="uploadType" (selectionChange)="onUploadTypeChange()">
+        <mat-option value="file">File</mat-option>
+        <mat-option value="link">Link</mat-option>
+      </mat-select>
     </mat-form-field>
-    <button mat-raised-button color="primary" (click)="upload()">Upload</button>
-  </div>
 
-  <!-- Select group/folder -->
-  <mat-form-field appearance="fill">
-    <mat-label>Select Group/Folder</mat-label>
-    <mat-select [(value)]="selectedGroup">
-      <mat-option *ngFor="let group of groups" [value]="group">{{ group }}</mat-option>
-    </mat-select>
-  </mat-form-field>
+    <div *ngIf="uploadType">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>File Description</mat-label>
+        <input matInput [(ngModel)]="fileDescription" placeholder="Enter description" />
+      </mat-form-field>
+    </div>
 
-  <mat-divider class="my-4"></mat-divider>
+    <!-- Step 3: Choose Group -->
+    <div *ngIf="uploadType && fileDescription">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Select Group/Folder</mat-label>
+        <mat-select [(value)]="selectedGroup">
+          <mat-option *ngFor="let group of groups" [value]="group">{{ group }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
 
+    <!-- Step 3: Upload Form -->
+    <div *ngIf="selectedGroup">
+
+      <!-- File Upload Section -->
+      <div *ngIf="uploadType === 'file'" class="upload-input">
+        <input #fileInput type="file" (change)="onFileSelected($event)" />
+        <button mat-raised-button color="primary" (click)="upload(fileInput)">Upload</button>
+      </div>
+
+
+      <!-- Link Upload -->
+      <div *ngIf="uploadType === 'link'" class="upload-input">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Paste Link</mat-label>
+          <input matInput [(ngModel)]="uploadedLink" placeholder="Enter file URL" />
+        </mat-form-field>
+      </div>
+
+    </div>
+
+  </mat-card>
   <!-- Table -->
-  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+  <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 custom-table">
+
+    <!-- File Name Column -->
     <ng-container matColumnDef="fileName">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>File Name</th>
-      <td mat-cell *matCellDef="let file">{{ file.fileName }}</td>
+      <td mat-cell *matCellDef="let file" [matTooltip]="file.fileName">
+        {{ file.fileName }}
+      </td>
     </ng-container>
 
+    <!-- Description Column with Tooltip -->
     <ng-container matColumnDef="description">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
-      <td mat-cell *matCellDef="let file">{{ file.description }}</td>
+      <td mat-cell class="ellipsis-cell" *matCellDef="let file" [matTooltip]="file.description">
+        {{ file.description }}
+      </td>
     </ng-container>
 
+    <!-- Created At -->
     <ng-container matColumnDef="createdAt">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Created At</th>
       <td mat-cell *matCellDef="let file">{{ file.createdAt | date:'short' }}</td>
     </ng-container>
 
+    <!-- Updated At -->
     <ng-container matColumnDef="updatedAt">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Updated At</th>
       <td mat-cell *matCellDef="let file">{{ file.updatedAt | date:'short' }}</td>
     </ng-container>
 
+    <!-- Created By -->
     <ng-container matColumnDef="createdBy">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Created By</th>
-      <td mat-cell *matCellDef="let file">{{ file.createdBy }}</td>
+      <td mat-cell *matCellDef="let file" [matTooltip]="file.createdBy">{{ file.createdBy }}</td>
     </ng-container>
 
+    <!-- Actions -->
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef>Actions</th>
       <td mat-cell *matCellDef="let file">
-        <button mat-icon-button (click)="editFile(file)">
+        <button mat-icon-button class="edit-icon" (click)="editFile(file)" matTooltip="Edit">
           <mat-icon>edit</mat-icon>
         </button>
-        <button mat-icon-button (click)="deleteFile(file)">
+        <button mat-icon-button class="delete-icon" (click)="deleteFile(file)" matTooltip="Delete">
           <mat-icon>delete</mat-icon>
         </button>
-        <button mat-icon-button (click)="downloadFile(file)">
+        <button mat-icon-button class="download-icon" (click)="downloadFile(file)" matTooltip="Download">
           <mat-icon>download</mat-icon>
         </button>
       </td>
     </ng-container>
 
+    <!-- Table Rows -->
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
 
+  <!-- Paginator -->
   <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+
+
 </div>
