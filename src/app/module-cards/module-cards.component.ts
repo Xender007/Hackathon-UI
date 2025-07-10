@@ -1,4 +1,5 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-module-cards',
@@ -12,6 +13,8 @@ export class ModuleCardsComponent {
   showRightArrow = false;
   showArrows = false;
 
+  constructor(private router : Router) {}
+
   modules = [
     {
       title: 'Welcome message by Pravin Rao COO Infosys',
@@ -22,6 +25,7 @@ export class ModuleCardsComponent {
       description:
         'U.B. Pravin welcomes you and talks about values and facilities that make Infosys unique.',
       image: 'https://images.unsplash.com/photo-1603791440384-56cd371ee9a7?auto=format&fit=crop&w=600&q=80',
+      status: 'Not Started'
     },
     {
       title: 'Infosys Strategy Narrative by CEO',
@@ -31,6 +35,7 @@ export class ModuleCardsComponent {
       rating: 4.8,
       description: 'CEO Salil Parekh describes Infosys strategy for client success.',
       image: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=600&q=80',
+      status: 'Completed'      
     },
     {
       title: 'Message from Head of Global Delivery',
@@ -40,6 +45,7 @@ export class ModuleCardsComponent {
       rating: 4.8,
       description: 'Thoughts on delivery trends and Infosys operations.',
       image: 'https://images.unsplash.com/photo-1603791440384-56cd371ee9a7?auto=format&fit=crop&w=600&q=80',
+      status: 'Not Started'
     },
     {
       title: 'Meet your onboarding buddy',
@@ -49,6 +55,7 @@ export class ModuleCardsComponent {
       rating: 4.9,
       description: 'A walkthrough of your onboarding companion.',
       image: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=600&q=80',
+      status: 'Completed'
     },
         {
       title: 'Welcome message by Pravin Rao COO Infosys',
@@ -59,6 +66,7 @@ export class ModuleCardsComponent {
       description:
         'U.B. Pravin welcomes you and talks about values and facilities that make Infosys unique.',
       image: 'https://images.unsplash.com/photo-1603791440384-56cd371ee9a7?auto=format&fit=crop&w=600&q=80',
+      status: 'Not Started'
     },
     {
       title: 'Infosys Strategy Narrative by CEO',
@@ -68,6 +76,7 @@ export class ModuleCardsComponent {
       rating: 4.8,
       description: 'CEO Salil Parekh describes Infosys strategy for client success.',
       image: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=600&q=80',
+      status: 'In-Progress'       
     },
     {
       title: 'Message from Head of Global Delivery',
@@ -77,6 +86,7 @@ export class ModuleCardsComponent {
       rating: 4.8,
       description: 'Thoughts on delivery trends and Infosys operations.',
       image: 'https://images.unsplash.com/photo-1603791440384-56cd371ee9a7?auto=format&fit=crop&w=600&q=80',
+      status: 'In-Progress' 
     },
     {
       title: 'Meet your onboarding buddy',
@@ -86,6 +96,7 @@ export class ModuleCardsComponent {
       rating: 4.9,
       description: 'A walkthrough of your onboarding companion.',
       image: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=600&q=80',
+      status: 'Completed'      
     },
   ];
 
@@ -114,5 +125,9 @@ export class ModuleCardsComponent {
 
     this.showLeftArrow = scrollLeft > 10;
     this.showRightArrow = scrollLeft < maxScrollLeft - 10;
+  }
+
+  OnStartClick() {
+    this.router.navigateByUrl('quiz');
   }
 }

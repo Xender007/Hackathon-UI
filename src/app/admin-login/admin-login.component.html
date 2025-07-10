@@ -1,7 +1,13 @@
- <div *ngIf="!isAuthenticated">
-      <button (click)="login()">Login with Microsoft</button>
-    </div>
-    <div *ngIf="isAuthenticated">
-      <p>Welcome, {{ userName }}</p>
-      <button (click)="logout()">Logout</button>
+<div style="text-align: center; margin-top: 50px;">
+  <h1>Azure AD Login (MSAL Angular)</h1>
+
+  <ng-container *ngIf="userName; else notLoggedIn">
+    <h3>Welcome, {{ userName }}</h3>
+    <p><strong>Token Stored:</strong> {{ hasToken }}</p>
+    <button (click)="logout()">Logout</button>
+  </ng-container>
+
+  <ng-template #notLoggedIn>
+    <button (click)="login()">Login with Microsoft</button>
+  </ng-template>
 </div>

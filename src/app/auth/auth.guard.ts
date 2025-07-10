@@ -1,23 +1,32 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
-import { OidcSecurityService } from 'angular-auth-oidc-client';
-import { map } from 'rxjs/operators';
+import {
+  CanActivate,
+  Router,
+  UrlTree,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+} from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { MsalService } from '@azure/msal-angular';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthGuard implements CanActivate {
-  constructor(private authService: OidcSecurityService, private router: Router) {}
+  constructor(private router: Router, private msalService: MsalService) {}
 
-  canActivate() {
-    return this.authService.isAuthenticated$.pipe(
-      map(({ isAuthenticated }) => {
-        if (!isAuthenticated) {
-          this.router.navigate(['/login']);
-          return false;
-        }
-        return true;
-      })
-    );
+  canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Observable<boolean | UrlTree> {
+    const account = this.msalService.instance.getActiveAccount();
+
+    if (account) {
+      // User is logged in
+      return of(true);
+    } else {
+      // Not logged in, redirect to login page
+      return of(this.router.createUrlTree(['/login']));
+    }
   }
 }
