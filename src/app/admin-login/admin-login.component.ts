@@ -22,7 +22,6 @@ export class AdminLoginComponent {
       this.userName = account.name ?? null;
     }
 
-    // Check if token is stored
     this.hasToken = !!localStorage.getItem('access_token');
   }
 

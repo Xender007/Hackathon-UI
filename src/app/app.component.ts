@@ -20,15 +20,15 @@ export class AppComponent implements OnInit {
           localStorage.setItem('access_token', result.accessToken);
 
           // Redirect to chatbot after login
-          //this.router.navigate(['/chatbot']);
-          this.router.navigate(['/chatbot', { reload: new Date().getTime() }]);
+          this.router.navigate(['/chatbot']);
+          //this.router.navigate(['/chatbot', { reload: new Date().getTime() }]);
         } else {
           const accounts = this.msalService.instance.getAllAccounts();
           if (accounts.length > 0) {
             this.msalService.instance.setActiveAccount(accounts[0]);
             // If user already logged in (page refresh), optionally redirect to chatbot
-            //this.router.navigate(['/chatbot']);
-            this.router.navigate(['/chatbot', { reload: new Date().getTime() }]);            
+            this.router.navigate(['/chatbot']);
+            //this.router.navigate(['/chatbot', { reload: new Date().getTime() }]);            
           }
         }
       })
