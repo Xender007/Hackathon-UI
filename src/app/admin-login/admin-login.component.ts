@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { OidcSecurityService } from 'angular-auth-oidc-client';
+import { MsalService } from '@azure/msal-angular';
+import { AuthenticationResult, SilentRequest } from '@azure/msal-browser';
+
 
 @Component({
   selector: 'app-admin-login',
@@ -9,30 +11,27 @@ import { OidcSecurityService } from 'angular-auth-oidc-client';
   standalone: false
 })
 export class AdminLoginComponent {
-isAuthenticated = false;
-  userName = '';
+  userName: string | null = null;
+  hasToken = false;
 
-  constructor(private authService: OidcSecurityService,
-     private router: Router
-  ) {}
+  constructor(private msalService: MsalService) {}
 
   ngOnInit(): void {
-    this.authService.checkAuth().subscribe(({ isAuthenticated, userData }) => {
-      this.isAuthenticated = isAuthenticated;
-      this.userName = userData?.name || userData?.email || '';
+    const account = this.msalService.instance.getActiveAccount();
+    if (account) {
+      this.userName = account.name ?? null;
+    }
 
-      // ✅ Navigate after login
-      if (isAuthenticated) {
-        this.router.navigate(['/chatbot']);
-      }
-    });
+    // Check if token is stored
+    this.hasToken = !!localStorage.getItem('access_token');
   }
 
   login(): void {
-    this.authService.authorize();
+    this.msalService.loginRedirect();
   }
 
   logout(): void {
-    this.authService.logoff(); // ✅ Method name is `logoff` not `logOut`
+    this.msalService.logoutRedirect({ postLogoutRedirectUri: '/' });
+    localStorage.removeItem('access_token');
   }
 }

@@ -22,8 +22,8 @@
           <h3 class="card-title">{{ module.title }}</h3>
           <p class="card-desc">{{ module.description }}</p>
           <div class="card-footer">
-            <span class="type">{{ module.type }}</span>
-            <span class="rating">⭐ {{ module.rating }}</span>
+            <span class="type">{{ module.status }}</span>
+            <button class="btn btn-primary" (click)="OnStartClick()">Start</button>
           </div>
         </div>
       </div>

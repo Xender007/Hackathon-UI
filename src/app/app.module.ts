@@ -1,18 +1,22 @@
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+import { NgModule, APP_INITIALIZER, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { AppRoutingModule } from './app-routing.module';
+// Components
 import { AppComponent } from './app.component';
 import { AdminLoginComponent } from './admin-login/admin-login.component';
 import { ChatbotComponent } from './chatbot/chatbot.component';
-import { AuthConfigModule } from './auth/auth-config.module';
 import { AppHeaderComponent } from './app-header/app-header.component';
 import { HeroBannerComponent } from './hero-banner/hero-banner.component';
 import { ModuleCardsComponent } from './module-cards/module-cards.component';
 import { LoginUploadComponent } from './login-upload/login-upload.component';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
+// Routing
+import { AppRoutingModule } from './app-routing.module';
+
+// Angular Material Modules
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -22,8 +26,33 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
-import { HttpClientModule } from '@angular/common/http';
 import { MatTooltipModule } from '@angular/material/tooltip';
+
+// MSAL Angular
+import {
+  MsalModule,
+  MsalService,
+  MsalGuard,
+  MsalBroadcastService,
+} from '@azure/msal-angular';
+import { InteractionType, PublicClientApplication } from '@azure/msal-browser';
+import { msalConfig, loginRequest, protectedResources } from './auth/auth.config';
+import { AuthInterceptor } from './auth/auth.interceptor';
+import { QuizComponent } from './quiz/quiz.component';
+
+// ✅ Custom Auth Interceptor
+
+
+// ✅ Properly await MSAL init before app boot
+export function initializeMsalInstance(msalService: MsalService) {
+  return async () => {
+    await msalService.instance.initialize();
+    const accounts = msalService.instance.getAllAccounts();
+    if (accounts.length > 0) {
+      msalService.instance.setActiveAccount(accounts[0]);
+    }
+  };
+}
 
 @NgModule({
   declarations: [
@@ -34,15 +63,32 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     HeroBannerComponent,
     ModuleCardsComponent,
     LoginUploadComponent,
+    QuizComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    AuthConfigModule,
     HttpClientModule,
     BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
+
+    // ✅ MSAL Configuration
+    MsalModule.forRoot(
+      new PublicClientApplication(msalConfig),
+      {
+        interactionType: InteractionType.Redirect,
+        authRequest: loginRequest
+      },
+      {
+        interactionType: InteractionType.Redirect,
+        protectedResourceMap: new Map([
+          [protectedResources.graphMe.endpoint, protectedResources.graphMe.scopes],
+        ])
+      }
+    ),
+
+    // Material
     MatTableModule,
     MatFormFieldModule,
     MatSelectModule,
@@ -52,11 +98,29 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatDividerModule,
     MatPaginatorModule,
     MatSortModule,
-    MatTooltipModule,
+    MatTooltipModule
   ],
-  providers: [],
+  providers: [
+    MsalService,
+    MsalGuard,
+    MsalBroadcastService,
+
+    // ✅ Custom AuthInterceptor to attach access token
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true,
+    },
+
+    // ✅ Await MSAL initialization before the app starts
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeMsalInstance,
+      deps: [MsalService],
+      multi: true,
+    }
+  ],
   bootstrap: [AppComponent],
-  // VERY IMPORTANT TO HAVE THIS!!!!
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule {}

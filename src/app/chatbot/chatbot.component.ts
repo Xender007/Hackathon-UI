@@ -6,59 +6,63 @@ import {
   OnInit,
   OnDestroy,
 } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
+import { TokenStoreService } from '../shared/token-store.service';
 
 @Component({
   selector: 'app-chatbot',
   templateUrl: './chatbot.component.html',
   styleUrls: ['./chatbot.component.css'],
 })
-export class ChatbotComponent implements OnInit, OnDestroy {
-  isMinimized = true;
+export class ChatbotComponent implements OnInit {
+  public isMinimized = true;
   private chatInstance: any;
   private routerSub!: Subscription;
+  private hasGreeted = false;
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
-    private router: Router
+    private router: Router,
+    private tokenStore: TokenStoreService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    const token = this.tokenStore.getAccessToken();
+    console.log('Use token:', token);
+
     if (isPlatformBrowser(this.platformId)) {
       this.loadChat();
-
-      this.routerSub = this.router.events
-        .pipe(filter((event) => event instanceof NavigationEnd))
-        .subscribe(() => {
-          // ✅ Wait for DOM to settle
-          setTimeout(() => this.loadChat(), 0);
-        });
     }
+
+
   }
 
-  ngOnDestroy(): void {
-    this.routerSub?.unsubscribe();
-  }
+  // ngOnDestroy(): void {
+  //   this.routerSub?.unsubscribe();
+  // }
 
   toggleChat(): void {
     this.isMinimized = !this.isMinimized;
 
     if (!this.isMinimized && this.chatInstance) {
       const hasMessages = this.chatInstance.messages?.length > 0;
-      if (!hasMessages) {
+      if (!hasMessages && !this.hasGreeted) {
         setTimeout(() => {
           this.chatInstance.addMessage?.({
-            text: 'Welcome! Ask me anything about Charter.',
+            text: 'Welcome! Ask me anything.',
             role: 'ai',
             typing: true,
           });
         }, 300);
+        this.hasGreeted = true;
       }
     }
   }
 
   private async loadChat(): Promise<void> {
+    //window.location.reload();
     const container = document.getElementById('chatbot-container');
     if (!container) return;
 
@@ -75,10 +79,18 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     };
 
     chat.requestInterceptor = (req: any) => {
+      const token = localStorage.getItem('access_token'); // or inject TokenStoreService if needed
+
       const messages = req.body?.messages || [];
       req.body = {
         query: messages[messages.length - 1]?.text?.trim() || '',
       };
+
+      req.headers = {
+        ...req.headers,
+        Authorization: `Bearer ${token}`,
+      };
+
       return req;
     };
 
@@ -86,16 +98,19 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       return { text: res.ai_answer || 'No answer received' };
     };
 
-    chat.setAttribute('style', `
+    chat.setAttribute(
+      'style',
+      `
       width: 100%;
       height: 100%;
       border: none;
       background-color: #1e1e1e;
       color: black;
-    `);
+    `
+    );
 
     // ✅ Your custom styling and features...
-       chat.textInput = {
+    chat.textInput = {
       styles: {
         text: { paddingRight: '40px' },
       },

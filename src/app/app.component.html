@@ -1,17 +1,23 @@
-<app-header></app-header>
-
-<!-- Show only header during /file/upload -->
-<ng-container *ngIf="!isFileUploadRoute()">
-  <main class="main-content">
-    <app-hero-banner></app-hero-banner>
-    <app-module-cards></app-module-cards>
-    <router-outlet></router-outlet>
-  </main>
-
-  <app-chatbot></app-chatbot>
-</ng-container>
-
-<!-- This outlet ensures /file/upload still loads -->
-<ng-container *ngIf="isFileUploadRoute()">
+<!-- Show only login page -->
+<ng-container *ngIf="isLoginRoute(); else layout">
   <router-outlet></router-outlet>
 </ng-container>
+
+<ng-template #layout>
+  <app-header></app-header>
+
+  <!-- Show only router outlet for minimal routes like /file/upload or /quiz -->
+  <ng-container *ngIf="isMinimalLayoutRoute(); else fullLayout">
+    <router-outlet></router-outlet>
+  </ng-container>
+
+  <!-- Full layout with hero, modules, and chatbot -->
+  <ng-template #fullLayout>
+    <main class="main-content">
+      <app-hero-banner></app-hero-banner>
+      <app-module-cards></app-module-cards>
+      <router-outlet></router-outlet>
+    </main>
+    <app-chatbot></app-chatbot>
+  </ng-template>
+</ng-template>

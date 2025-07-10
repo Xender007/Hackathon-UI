@@ -1,0 +1,58 @@
+<div class="container mt-4 quiz-container" [ngClass]="statusClass">
+  <form (ngSubmit)="onSubmit()">
+    <div *ngFor="let q of questions; let i = index" class="mb-4">
+      <h5>Q{{ i + 1 }}. {{ q.question }}</h5>
+
+      <div *ngFor="let key of getOptionKeys(q.options)" class="form-check d-flex align-items-center">
+        <input
+          class="form-check-input me-2"
+          type="radio"
+          [name]="'question' + i"
+          [value]="key"
+          [checked]="selectedAnswers[i] === key"
+          [disabled]="submitted"
+          (change)="onSelect(i, key)"
+        />
+
+        <label
+          class="form-check-label"
+          [ngClass]="{
+            'fw-bold': submitted && (getCorrectOption(i) === key),
+            'text-success': submitted && getCorrectOption(i) === key,
+            'text-danger': submitted && selectedAnswers[i] === key && getCorrectOption(i) !== key
+          }"
+        >
+          {{ key }}. {{ q.options[key] }}
+
+          <span *ngIf="submitted && getCorrectOption(i) === key" class="ms-2">✔</span>
+          <span *ngIf="submitted && selectedAnswers[i] === key && getCorrectOption(i) !== key" class="ms-2">❌</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Score and Feedback -->
+    <div *ngIf="submitted" class="mt-4">
+      <h5>Your Score: {{ score }}</h5>
+      <p class="text-muted">Accuracy: {{ accuracy }}%</p>
+      <div class="alert alert-info">
+        <strong>Feedback:</strong> {{ overallFeedback }}
+      </div>
+    </div>
+
+    <!-- Submit or Sent Email -->
+    <div class="text-center mt-4">
+      <button *ngIf="!submitted" type="submit" class="btn btn-primary">Submit</button>
+      <button *ngIf="submitted && accuracy >= desiredAccuracy" type="button" class="btn btn-success">Sent Email</button>
+    </div>
+  </form>
+</div>
+
+<!-- Popup -->
+<div class="popup" *ngIf="showPopup">
+  <div class="popup-content">
+    <h4 class="text-success">🎉 Quiz Passed!</h4>
+    <p><strong>Accuracy:</strong> {{ accuracy }}%</p>
+    <p>{{ overallFeedback }}</p>
+    <button class="btn btn-outline-secondary" (click)="showPopup = false">Close</button>
+  </div>
+</div>
