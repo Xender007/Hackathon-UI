@@ -1,13 +1,20 @@
-<div style="text-align: center; margin-top: 50px;">
-  <h1>Azure AD Login (MSAL Angular)</h1>
+<div class="login-container">
+  <div class="login-card">
+    <img src="https://cdn.worldvectorlogo.com/logos/microsoft-azure-2.svg" alt="Azure Logo" class="logo" />
 
-  <ng-container *ngIf="userName; else notLoggedIn">
-    <h3>Welcome, {{ userName }}</h3>
-    <p><strong>Token Stored:</strong> {{ hasToken }}</p>
-    <button (click)="logout()">Logout</button>
-  </ng-container>
+    <h2>Sign in with Microsoft</h2>
+    <p class="subtext">Secure access via Azure Active Directory</p>
 
-  <ng-template #notLoggedIn>
-    <button (click)="login()">Login with Microsoft</button>
-  </ng-template>
+    <ng-container *ngIf="userName; else notLoggedIn">
+      <div class="user-info">
+        <h4>Welcome, <span class="username">{{ userName }}</span></h4>
+        <p><strong>Token Stored:</strong> {{ hasToken }}</p>
+        <button class="btn logout-btn" (click)="logout()">Logout</button>
+      </div>
+    </ng-container>
+
+    <ng-template #notLoggedIn>
+      <button class="btn login-btn" (click)="login()">Login with Microsoft</button>
+    </ng-template>
+  </div>
 </div>

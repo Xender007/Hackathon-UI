@@ -1,0 +1,70 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(to bottom right, #0078d4, #004578);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.login-card {
+  background-color: #ffffff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.logo {
+  width: 60px;
+  margin-bottom: 20px;
+}
+
+h2 {
+  margin-bottom: 8px;
+  font-size: 24px;
+  color: #004578;
+}
+
+.subtext {
+  font-size: 14px;
+  color: #666666;
+  margin-bottom: 30px;
+}
+
+.username {
+  color: #0078d4;
+}
+
+.btn {
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-btn {
+  background-color: #0078d4;
+  color: white;
+}
+
+.login-btn:hover {
+  background-color: #005a9e;
+}
+
+.logout-btn {
+  background-color: #e81123;
+  color: white;
+}
+
+.logout-btn:hover {
+  background-color: #a80000;
+}
+
+.user-info {
+  margin-top: 20px;
+}

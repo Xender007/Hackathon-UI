@@ -13,7 +13,7 @@ const routes: Routes = [
   // Protected routes - require login
   { path: 'chatbot', component: ChatbotComponent, canActivate: [AuthGuard] },
   { path: 'file/upload', component: LoginUploadComponent, canActivate: [AuthGuard] },
-  { path: 'quiz', component: QuizComponent },
+  { path: 'quiz', component: QuizComponent, canActivate: [AuthGuard] },
   // Redirect everything else to login
   { path: '**', redirectTo: '/login', pathMatch: 'full' }  
 ];
