@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-login-upload',
@@ -23,13 +24,16 @@ export class LoginUploadComponent implements AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient,
+      private spinner: NgxSpinnerService
+  ) {}
 
   ngAfterViewInit(): void {
     this.fetchUploadedFiles();
   }
 
   fetchUploadedFiles(): void {
+    this.spinner.show();
     this.http.get<any>('http://20.246.73.80:5000/api/files').subscribe({
       next: (response) => {
         if (response.success && Array.isArray(response.files)) {
@@ -49,10 +53,12 @@ export class LoginUploadComponent implements AfterViewInit {
           // Reconnect paginator and sort
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
+          this.spinner.hide()
         }
       },
       error: (error) => {
         console.error('Failed to load uploaded files:', error);
+        this.spinner.hide();
       }
     });
   }
@@ -72,6 +78,7 @@ export class LoginUploadComponent implements AfterViewInit {
   }
 
   upload(fileInput?: HTMLInputElement): void {
+    this.spinner.show();
     if (this.uploadType === 'file') {
     if (!this.selectedFile || !this.selectedGroup || !this.fileDescription) {
       alert('Please select a file, group, and enter description.');
@@ -89,10 +96,12 @@ export class LoginUploadComponent implements AfterViewInit {
         this.fileDescription = '';
         if (fileInput) fileInput.value = '';
         this.fetchUploadedFiles(); // Refresh the table
+        this.spinner.hide();
       },
       error: (err) => {
         console.error('Upload failed', err);
         alert('Upload failed. Please try again.');
+        this.spinner.hide();
       }
     });
   } else if (this.uploadType === 'link') {
@@ -125,6 +134,7 @@ export class LoginUploadComponent implements AfterViewInit {
   const confirmed = confirm(`Are you sure you want to delete "${file.fileName}"?`);
   if (!confirmed) return;
 
+  this.spinner.show();
   this.http.delete<any>(`http://20.246.73.80:5000/api/files/${encodeURIComponent(file.fileName)}`)
     .subscribe({
       next: (response) => {
@@ -136,13 +146,16 @@ export class LoginUploadComponent implements AfterViewInit {
             this.dataSource._updateChangeSubscription(); // Refresh the table
           }
           alert(`Deleted successfully: ${file.fileName}`);
+          this.spinner.hide();
         } else {
           alert(`Failed to delete: ${file.fileName}`);
+          this.spinner.hide();
         }
       },
       error: (err) => {
         console.error('Delete failed', err);
         alert(`Delete failed: ${file.fileName}`);
+        this.spinner.hide();
       }
     });
   }

@@ -39,6 +39,7 @@ import { InteractionType, PublicClientApplication } from '@azure/msal-browser';
 import { msalConfig, loginRequest, protectedResources } from './auth/auth.config';
 import { AuthInterceptor } from './auth/auth.interceptor';
 import { QuizComponent } from './quiz/quiz.component';
+import { NgxSpinnerModule } from 'ngx-spinner';
 
 // ✅ Custom Auth Interceptor
 
@@ -98,7 +99,10 @@ export function initializeMsalInstance(msalService: MsalService) {
     MatDividerModule,
     MatPaginatorModule,
     MatSortModule,
-    MatTooltipModule
+    MatTooltipModule,
+
+    //Spinner
+    NgxSpinnerModule,
   ],
   providers: [
     MsalService,

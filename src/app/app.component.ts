@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
 import { AuthenticationResult } from '@azure/msal-browser';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +10,7 @@ import { AuthenticationResult } from '@azure/msal-browser';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-  constructor(private router: Router, private msalService: MsalService) {}
+  constructor(private router: Router, private msalService: MsalService, private spinner: NgxSpinnerService) {}
 
   ngOnInit(): void {
     this.msalService.instance
@@ -20,6 +21,7 @@ export class AppComponent implements OnInit {
           localStorage.setItem('access_token', result.accessToken);
 
           // Redirect to chatbot after login
+          this.spinner.show();
           this.router.navigate(['/chatbot']);
           //this.router.navigate(['/chatbot', { reload: new Date().getTime() }]);
         } else {
@@ -27,6 +29,7 @@ export class AppComponent implements OnInit {
           if (accounts.length > 0) {
             this.msalService.instance.setActiveAccount(accounts[0]);
             // If user already logged in (page refresh), optionally redirect to chatbot
+            //this.spinner.show();            
             this.router.navigate(['/chatbot']);
             //this.router.navigate(['/chatbot', { reload: new Date().getTime() }]);            
           }

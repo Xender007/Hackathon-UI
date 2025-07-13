@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { MsalService } from '@azure/msal-angular';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-header',
@@ -7,7 +9,11 @@ import { Router } from '@angular/router';
   styleUrls: ['./app-header.component.css']
 })
 export class AppHeaderComponent {
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private msalService: MsalService,
+    private spinner: NgxSpinnerService
+  ) {}
   
   isSidebarOpen = false;
   menuItems = [
@@ -18,6 +24,11 @@ export class AppHeaderComponent {
     { icon: '🚪', label: 'Logout' }
   ];
 
+  ngAfterViewInit(): void {
+    //Called after ngAfterContentInit when the component's view has been initialized. Applies to components only.
+    //Add 'implements AfterViewInit' to the class.
+    this.spinner.hide();
+  }
 
   toggleSidebar() {
     this.isSidebarOpen = !this.isSidebarOpen;
@@ -43,12 +54,20 @@ export class AppHeaderComponent {
         //this.router.navigate(['/settings']);
         break;
       case 'Logout':
-        //this.handleLogout();
+        this.logout();
         console.warn(`Logged Out!!`);
         break;
       default:
         console.warn(`No route defined for ${label}`);
     }
+  }
+
+  logout(): void {
+    this.spinner.show();
+    setTimeout(() => {
+      localStorage.removeItem('access_token');
+      this.msalService.logoutRedirect({ postLogoutRedirectUri: '/' });
+    }, 800); // Slight delay to allow spinner to be visible
   }
 
 

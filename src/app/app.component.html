@@ -1,6 +1,10 @@
+<!-- Always instantiate chatbot but hidden by default -->
+<app-chatbot [hidden]="isLoginRoute()"></app-chatbot>
+
 <!-- Show only login page -->
 <ng-container *ngIf="isLoginRoute(); else layout">
   <router-outlet></router-outlet>
+  <ngx-spinner type="ball-climbing-dot"></ngx-spinner>
 </ng-container>
 
 <ng-template #layout>
@@ -9,15 +13,17 @@
   <!-- Show only router outlet for minimal routes like /file/upload or /quiz -->
   <ng-container *ngIf="isMinimalLayoutRoute(); else fullLayout">
     <router-outlet></router-outlet>
+    <ngx-spinner type="ball-climbing-dot"></ngx-spinner>
   </ng-container>
 
-  <!-- Full layout with hero, modules, and chatbot -->
+  <!-- Full layout with hero, modules, and chatbot visible -->
   <ng-template #fullLayout>
     <main class="main-content">
       <app-hero-banner></app-hero-banner>
       <app-module-cards></app-module-cards>
       <router-outlet></router-outlet>
+      <ngx-spinner type="ball-climbing-dot"></ngx-spinner>
     </main>
-    <app-chatbot></app-chatbot>
+    <!-- ❌ Remove duplicate chatbot here -->
   </ng-template>
 </ng-template>
