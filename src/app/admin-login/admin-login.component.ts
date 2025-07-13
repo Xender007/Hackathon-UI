@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
 import { AuthenticationResult, SilentRequest } from '@azure/msal-browser';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 
 @Component({
@@ -14,7 +15,10 @@ export class AdminLoginComponent {
   userName: string | null = null;
   hasToken = false;
 
-  constructor(private msalService: MsalService) {}
+  constructor(
+    private msalService: MsalService,
+    private spinner: NgxSpinnerService,
+  ) {}
 
   ngOnInit(): void {
     const account = this.msalService.instance.getActiveAccount();
@@ -26,6 +30,7 @@ export class AdminLoginComponent {
   }
 
   login(): void {
+    this.spinner.show();
     this.msalService.loginRedirect();
   }
 

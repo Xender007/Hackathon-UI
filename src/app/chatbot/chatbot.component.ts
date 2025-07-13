@@ -4,10 +4,10 @@ import {
   Inject,
   PLATFORM_ID,
   OnInit,
-  OnDestroy,
+  ElementRef,
+  ViewChild,
 } from '@angular/core';
-import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
-import { Subscription, filter } from 'rxjs';
+import { Router } from '@angular/router';
 import { TokenStoreService } from '../shared/token-store.service';
 
 @Component({
@@ -18,30 +18,24 @@ import { TokenStoreService } from '../shared/token-store.service';
 export class ChatbotComponent implements OnInit {
   public isMinimized = true;
   private chatInstance: any;
-  private routerSub!: Subscription;
   private hasGreeted = false;
+
+  @ViewChild('chatbotContainer', { static: true }) chatbotContainer!: ElementRef;
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private router: Router,
-    private tokenStore: TokenStoreService,
-    private route: ActivatedRoute
+    private tokenStore: TokenStoreService
   ) {}
 
   ngOnInit(): void {
-    const token = this.tokenStore.getAccessToken();
-    console.log('Use token:', token);
-
     if (isPlatformBrowser(this.platformId)) {
-      this.loadChat();
+      const token = this.tokenStore.getAccessToken();
+      console.log('Token:', token);
+      // Delay ensures DOM is ready after MSAL redirect
+      setTimeout(() => this.loadChat(), 300);
     }
-
-
   }
-
-  // ngOnDestroy(): void {
-  //   this.routerSub?.unsubscribe();
-  // }
 
   toggleChat(): void {
     this.isMinimized = !this.isMinimized;
@@ -62,12 +56,11 @@ export class ChatbotComponent implements OnInit {
   }
 
   private async loadChat(): Promise<void> {
-    //window.location.reload();
-    const container = document.getElementById('chatbot-container');
+    const container = this.chatbotContainer?.nativeElement || document.getElementById('chatbot-container');
     if (!container) return;
 
-    container.innerHTML = '';
-    this.chatInstance = null;
+    // Prevent re-adding deep-chat
+    if (container.querySelector('deep-chat')) return;
 
     const { DeepChat } = await import('deep-chat');
     const chat = document.createElement('deep-chat') as any;
@@ -79,18 +72,15 @@ export class ChatbotComponent implements OnInit {
     };
 
     chat.requestInterceptor = (req: any) => {
-      const token = localStorage.getItem('access_token'); // or inject TokenStoreService if needed
-
+      const token = localStorage.getItem('access_token');
       const messages = req.body?.messages || [];
       req.body = {
         query: messages[messages.length - 1]?.text?.trim() || '',
       };
-
       req.headers = {
         ...req.headers,
         Authorization: `Bearer ${token}`,
       };
-
       return req;
     };
 
@@ -109,7 +99,6 @@ export class ChatbotComponent implements OnInit {
     `
     );
 
-    // ✅ Your custom styling and features...
     chat.textInput = {
       styles: {
         text: { paddingRight: '40px' },
@@ -182,6 +171,7 @@ export class ChatbotComponent implements OnInit {
         },
       },
     };
+
     container.appendChild(chat);
   }
 }
