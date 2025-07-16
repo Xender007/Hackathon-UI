@@ -1,6 +1,12 @@
 <div class="container mt-4 quiz-container" [ngClass]="statusClass" *ngIf="showBtn">
+  <!-- Timer -->
   <div class="text-end mb-3" *ngIf="!submitted">
     <span class="badge bg-dark fs-6">⏱ Time Left: {{ displayTime }}</span>
+  </div>
+
+  <!-- Watermark -->
+  <div *ngIf="submitted" class="watermark text-uppercase fw-bold" [ngClass]="statusClass">
+    {{ statusClass }}
   </div>
 
   <form (ngSubmit)="onSubmit()">
@@ -30,9 +36,12 @@
           <span *ngIf="submitted && selectedAnswers[i] === key && getCorrectOption(i) !== key" class="ms-2">❌</span>
         </label>
       </div>
+
+      <div *ngIf="submitted" class="ms-4 mt-1">
+        <small class="text-muted">Feedback: {{ getFeedback(i) }}</small>
+      </div>
     </div>
 
-    <!-- Score and Feedback -->
     <div *ngIf="submitted" class="mt-4">
       <h5>Your Score: {{ score }}</h5>
       <p class="text-muted">Accuracy: {{ accuracy }}%</p>
@@ -41,15 +50,21 @@
       </div>
     </div>
 
-    <!-- Submit or Sent Email -->
     <div class="text-center mt-4">
       <button *ngIf="!submitted" type="submit" class="btn btn-primary">Submit</button>
-      <button *ngIf="submitted && accuracy >= desiredAccuracy" type="button" class="btn btn-success">Sent Email</button>
+      <button
+        *ngIf="submitted && statusClass === 'passed'"
+        type="button"
+        class="btn btn-success"
+        (click)="openEmailPopup()"
+      >
+        Sent Email
+      </button>
     </div>
   </form>
 </div>
 
-<!-- Popup -->
+<!-- Quiz Result Popup -->
 <div class="popup" *ngIf="showPopup">
   <div class="popup-content" [ngClass]="popupType === 'error' ? 'border border-danger' : 'border border-success'">
     <h4 [ngClass]="popupType === 'success' ? 'text-success' : 'text-danger'">
@@ -59,6 +74,30 @@
     <p>{{ popupMessage }}</p>
     <div class="text-end">
       <button class="btn btn-outline-secondary mt-2" (click)="showPopup = false">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Email Popup -->
+<div class="popup" *ngIf="showEmailPopup">
+  <div class="popup-content border border-primary">
+    <h4 class="text-primary">📤 Send Result via Email</h4>
+    <div class="form-group text-start mt-3">
+      <label for="recipientEmail"><strong>Recipient Email</strong></label>
+      <input
+        id="recipientEmail"
+        type="email"
+        [(ngModel)]="recipientEmail"
+        name="recipientEmail"
+        class="form-control mt-1"
+        placeholder="example@domain.com"
+        required
+      />
+      <small *ngIf="emailError" class="text-danger">{{ emailError }}</small>
+    </div>
+    <div class="text-end mt-4">
+      <button class="btn btn-secondary me-2" (click)="closeEmailPopup()">Cancel</button>
+      <button class="btn btn-success" (click)="sendEmail()">Send</button>
     </div>
   </div>
 </div>

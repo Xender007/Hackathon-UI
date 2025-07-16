@@ -40,9 +40,11 @@ export class AppComponent implements OnInit {
       });
   }
 
-  isMinimalLayoutRoute(): boolean {
-    return this.router.url === '/file/upload' || this.router.url === '/quiz';
-  }
+ isMinimalLayoutRoute(): boolean {
+  const currentRoute = this.router.url;
+  return currentRoute.includes('/file/upload') || currentRoute.includes('/quiz');
+}
+
 
   isLoginRoute(): boolean {
     return this.router.url === '/login'; // Change if your login path differs

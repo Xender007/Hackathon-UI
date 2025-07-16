@@ -3,12 +3,12 @@ import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class QuizService {
-  private apiUrl = 'http://20.246.73.80:5000/api/';
+  private apiUrl = 'http://74.235.189.94:8000/';
 
   constructor(private http: HttpClient) {}
 
   startQuiz(fileName: string) {
-    return this.http.post<any>(this.apiUrl + 'start-quiz', { file_name: fileName });
+    return this.http.post<any>(this.apiUrl + 'assessment/generate_quiz', { asset_id: fileName });
   }
 
   submitQuiz(attemptId: string, userAnswers: string[]) {
@@ -16,6 +16,6 @@ export class QuizService {
         attempt_id: attemptId,
         user_answers: userAnswers
       };
-      return this.http.post<any>(this.apiUrl + 'submit-quiz', body);
+      return this.http.post<any>(this.apiUrl + 'assessment/evaluate_quiz', body);
   }
 }

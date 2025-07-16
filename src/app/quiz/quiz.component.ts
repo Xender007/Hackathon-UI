@@ -1,6 +1,9 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { QuizService } from '../services/quiz.service';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { first } from 'rxjs';
 
 @Component({
   selector: 'app-quiz',
@@ -10,39 +13,73 @@ import { NgxSpinnerService } from 'ngx-spinner';
 export class QuizComponent implements OnInit {
   questions: any[] = [];
   selectedAnswers: string[] = [];
+  assessmentResult: any[] = [];
+
   attemptId: string = '';
   submitted = false;
   showBtn = false;
 
-  assessmentResult: any[] = [];
-  score: string = '';
+  showEmailPopup = false;
+  recipientEmail = '';
+  emailError = '';
+
+  score: number = 0;
   accuracy: number = 0;
   overallFeedback: string = '';
   showPopup = false;
   popupMessage = '';
   popupType: 'success' | 'error' = 'success';
-  desiredAccuracy = 0;
   statusClass: 'passed' | 'failed' | '' = '';
 
-  timer = 300; // 5 minutes
+  timer = 600;
   displayTime = '';
   countdownInterval: any;
+  timerStarted = false;
 
   constructor(
     private quizService: QuizService,
-    private spinner: NgxSpinnerService
+    private spinner: NgxSpinnerService,
+    private route: ActivatedRoute,
+    private http: HttpClient,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.spinner.show();
-    this.quizService.startQuiz('PolyBanking.pdf').subscribe(res => {
-      this.questions = res.questions;
-      this.attemptId = res.attempt_id;
-      this.selectedAnswers = new Array(this.questions.length).fill('');
-      this.showBtn = true;
-      this.spinner.hide();
+    this.route.queryParams.pipe(first()).subscribe(params => {
+      const title = params['title'];
+      if (!title) {
+        console.error('Missing query param: title');
+        this.spinner.hide();
+        return;
+      }
 
-      this.startTimer();
+      this.quizService.startQuiz(title).subscribe({
+        next: (res) => {
+          this.questions = res.questions;
+          this.attemptId = res.attempt_id;
+          this.selectedAnswers = new Array(this.questions.length).fill('');
+          this.showBtn = true;
+          this.spinner.hide();
+
+          if (!this.timerStarted) {
+            this.startTimer();
+            this.timerStarted = true;
+          }
+
+          const updatedParams = { ...params, attempt_id: this.attemptId };
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: updatedParams,
+            queryParamsHandling: 'merge',
+            replaceUrl: true
+          });
+        },
+        error: (err) => {
+          console.error('Failed to start quiz:', err);
+          this.spinner.hide();
+        }
+      });
     });
   }
 
@@ -60,6 +97,10 @@ export class QuizComponent implements OnInit {
     return this.assessmentResult[index]?.correct_option;
   }
 
+  getFeedback(index: number): string {
+    return this.assessmentResult[index]?.feedback || '';
+  }
+
   onSubmit(autoSubmit = false): void {
     if (!autoSubmit && this.selectedAnswers.some(ans => !ans)) {
       this.showErrorPopup('⚠️ Please answer all questions to complete the quiz.');
@@ -70,17 +111,17 @@ export class QuizComponent implements OnInit {
     clearInterval(this.countdownInterval);
 
     this.quizService.submitQuiz(this.attemptId, this.selectedAnswers).subscribe(res => {
-      this.assessmentResult = res.assessment_result;
+      this.assessmentResult = res.question_results;
       this.score = res.score;
-      this.accuracy = res.accuracy;
+      this.accuracy = res.score; // backend score is percentage
       this.overallFeedback = res.overall_feedback;
       this.submitted = true;
 
-      this.statusClass = this.accuracy >= this.desiredAccuracy ? 'passed' : 'failed';
+      this.statusClass = res.status === 'Pass' ? 'passed' : 'failed';
 
       if (autoSubmit) {
         this.showErrorPopup('⏰ Time is up! Quiz auto-submitted.');
-      } else if (this.accuracy >= this.desiredAccuracy) {
+      } else if (this.statusClass === 'passed') {
         this.showSuccessPopup();
       }
 
@@ -109,7 +150,7 @@ export class QuizComponent implements OnInit {
       } else {
         clearInterval(this.countdownInterval);
         if (!this.submitted) {
-          this.onSubmit(true); // autoSubmit = true
+          this.onSubmit(true);
         }
       }
     }, 1000);
@@ -135,5 +176,52 @@ export class QuizComponent implements OnInit {
 
   @HostListener('document:contextmenu', ['$event']) blockRightClick(e: MouseEvent) {
     e.preventDefault();
+  }
+
+  openEmailPopup(): void {
+    this.recipientEmail = '';
+    this.emailError = '';
+    this.showEmailPopup = true;
+  }
+
+  closeEmailPopup(): void {
+    this.showEmailPopup = false;
+    this.recipientEmail = '';
+    this.emailError = '';
+  }
+
+  sendEmail(): void {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!this.recipientEmail) {
+      this.emailError = 'Email is required.';
+      return;
+    }
+
+    if (!emailRegex.test(this.recipientEmail.trim())) {
+      this.emailError = 'Please enter a valid email address.';
+      return;
+    }
+
+    const attemptId = this.route.snapshot.queryParamMap.get('attempt_id');
+    if (!attemptId) {
+      this.emailError = 'Attempt ID is missing. Cannot send email.';
+      return;
+    }
+
+    const payload = {
+      recipient: this.recipientEmail.trim(),
+      attempt_id: attemptId
+    };
+
+    this.http.post('http://74.235.189.94:8000/email/send', payload).subscribe({
+      next: () => {
+        alert(`✅ Results sent to ${this.recipientEmail}`);
+        this.closeEmailPopup();
+      },
+      error: (err) => {
+        console.error('❌ Error sending email:', err);
+        this.emailError = 'Failed to send email. Please try again.';
+      }
+    });
   }
 }

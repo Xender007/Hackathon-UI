@@ -1,5 +1,5 @@
 <section class="module-section">
-  <h2 class="section-title">Week 1 Modules</h2>
+  <h2 class="section-title">Your Courses</h2>
 
   <div class="scroll-wrapper" (mouseenter)="showArrows = true" (mouseleave)="showArrows = false">
     <button
@@ -13,17 +13,17 @@
 
     <div #scrollContainer class="scroll-container" (scroll)="onScroll()">
       <div class="module-card" *ngFor="let module of modules">
-        <img [src]="module.image" alt="Module" class="card-image" />
+        <img src="https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=600&q=80" alt="Module" class="card-image" />
         <div class="card-content">
           <div class="card-meta">
             <span class="level">{{ module.level }}</span>
             <span class="duration">{{ module.duration }}</span>
           </div>
-          <h3 class="card-title">{{ module.title }}</h3>
-          <p class="card-desc">{{ module.description }}</p>
+          <h3 class="card-title" (click)="onStartContentClick(module.file_name, module.document_id, module.status)">{{ module.file_name }}</h3>
+          <p class="card-desc">{{ module.summary }}</p>
           <div class="card-footer">
             <span class="type">{{ module.status }}</span>
-            <button class="btn btn-primary" (click)="OnStartClick()">Start</button>
+            <button class="btn btn-success" (click)="OnStartClick(module.document_id)">Start Quiz</button>
           </div>
         </div>
       </div>
@@ -39,7 +39,53 @@
     </button>
   </div>
 
-  <div class="view-all-wrapper">
+  <!-- <div class="view-all-wrapper">
     <button class="view-all-btn">View All Modules</button>
+  </div> -->
+</section>
+
+
+<section class="content-section">
+  <h2 class="section-title">All Courses</h2>
+
+  <div class="scroll-wrapper" (mouseenter)="showArrows = true" (mouseleave)="showArrows = false">
+    <button
+      class="scroll-btn left"
+      *ngIf="showArrows && showLeftArrow"
+      (click)="scrollLeft()"
+      [disabled]="!showLeftArrow"
+    >
+      ❮
+    </button>
+
+    <div #scrollContainer class="scroll-container" (scroll)="onScroll()">
+      <div class="module-card" *ngFor="let module of content">
+        <img src="https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=600&q=80" alt="Module" class="card-image" />
+        <div class="card-content">
+          <div class="card-meta">
+            <span class="level">{{ module.level }}</span>
+            <span class="duration">{{ module.duration }}</span>
+          </div>
+          <h3 class="card-title" (click)="onStartContentClick(module.fileName, module.document_id, module.status)">{{ module.fileName }}</h3>
+          <p class="card-desc">{{ module.description }}</p>
+          <div class="card-footer">
+            <span class="type-not">Not Started</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button
+      class="scroll-btn right"
+      *ngIf="showArrows && showRightArrow"
+      (click)="scrollRight()"
+      [disabled]="!showRightArrow"
+    >
+      ❯
+    </button>
   </div>
+
+  <!-- <div class="view-all-wrapper">
+    <button class="view-all-btn">View All Modules</button>
+  </div> -->
 </section>
