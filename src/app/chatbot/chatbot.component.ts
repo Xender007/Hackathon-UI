@@ -67,7 +67,7 @@ export class ChatbotComponent implements OnInit {
     this.chatInstance = chat;
 
     chat.connect = {
-      url: 'http://20.246.73.80:5000/api/search',
+      url: 'http://74.235.189.94:8000/semantic/search',
       method: 'POST',
     };
 
@@ -75,7 +75,7 @@ export class ChatbotComponent implements OnInit {
       const token = localStorage.getItem('access_token');
       const messages = req.body?.messages || [];
       req.body = {
-        query: messages[messages.length - 1]?.text?.trim() || '',
+        text : messages[messages.length - 1]?.text?.trim() || '',
       };
       req.headers = {
         ...req.headers,

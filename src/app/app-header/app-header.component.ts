@@ -20,7 +20,6 @@ export class AppHeaderComponent {
     { icon: '🏠', label: 'Home' },
     { icon: '📚', label: 'Modules' },
     { icon: '👤', label: 'Admin Panel' },
-    { icon: '⚙️', label: 'Settings' },
     { icon: '🚪', label: 'Logout' }
   ];
 

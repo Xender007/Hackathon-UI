@@ -1,124 +1,68 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, OnInit, AfterViewInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-module-cards',
   templateUrl: './module-cards.component.html',
   styleUrls: ['./module-cards.component.css']
 })
-export class ModuleCardsComponent {
+export class ModuleCardsComponent implements OnInit, AfterViewInit {
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
 
   showLeftArrow = false;
   showRightArrow = false;
   showArrows = false;
 
-  constructor(private router : Router) {}
+  files : any;
 
-  modules = [
-    {
-      title: 'Welcome message by Pravin Rao COO Infosys',
-      duration: '3m 14s',
-      level: 'Beginner',
-      type: 'Article',
-      rating: 4.8,
-      description:
-        'U.B. Pravin welcomes you and talks about values and facilities that make Infosys unique.',
-      image: 'https://images.unsplash.com/photo-1603791440384-56cd371ee9a7?auto=format&fit=crop&w=600&q=80',
-      status: 'Not Started'
-    },
-    {
-      title: 'Infosys Strategy Narrative by CEO',
-      duration: '5m 2s',
-      level: 'Beginner',
-      type: 'Insights',
-      rating: 4.8,
-      description: 'CEO Salil Parekh describes Infosys strategy for client success.',
-      image: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=600&q=80',
-      status: 'Completed'      
-    },
-    {
-      title: 'Message from Head of Global Delivery',
-      duration: '3m 57s',
-      level: 'Beginner',
-      type: 'Insights',
-      rating: 4.8,
-      description: 'Thoughts on delivery trends and Infosys operations.',
-      image: 'https://images.unsplash.com/photo-1603791440384-56cd371ee9a7?auto=format&fit=crop&w=600&q=80',
-      status: 'Not Started'
-    },
-    {
-      title: 'Meet your onboarding buddy',
-      duration: '2m 10s',
-      level: 'Beginner',
-      type: 'Article',
-      rating: 4.9,
-      description: 'A walkthrough of your onboarding companion.',
-      image: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=600&q=80',
-      status: 'Completed'
-    },
-        {
-      title: 'Welcome message by Pravin Rao COO Infosys',
-      duration: '3m 14s',
-      level: 'Beginner',
-      type: 'Article',
-      rating: 4.8,
-      description:
-        'U.B. Pravin welcomes you and talks about values and facilities that make Infosys unique.',
-      image: 'https://images.unsplash.com/photo-1603791440384-56cd371ee9a7?auto=format&fit=crop&w=600&q=80',
-      status: 'Not Started'
-    },
-    {
-      title: 'Infosys Strategy Narrative by CEO',
-      duration: '5m 2s',
-      level: 'Beginner',
-      type: 'Insights',
-      rating: 4.8,
-      description: 'CEO Salil Parekh describes Infosys strategy for client success.',
-      image: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=600&q=80',
-      status: 'In-Progress'       
-    },
-    {
-      title: 'Message from Head of Global Delivery',
-      duration: '3m 57s',
-      level: 'Beginner',
-      type: 'Insights',
-      rating: 4.8,
-      description: 'Thoughts on delivery trends and Infosys operations.',
-      image: 'https://images.unsplash.com/photo-1603791440384-56cd371ee9a7?auto=format&fit=crop&w=600&q=80',
-      status: 'In-Progress' 
-    },
-    {
-      title: 'Meet your onboarding buddy',
-      duration: '2m 10s',
-      level: 'Beginner',
-      type: 'Article',
-      rating: 4.9,
-      description: 'A walkthrough of your onboarding companion.',
-      image: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=600&q=80',
-      status: 'Completed'      
-    },
-  ];
+  modules: any[] = [];
 
-  ngAfterViewInit() {
+  content: any[] = [];
+
+  constructor(private http: HttpClient, private router: Router , private spinner: NgxSpinnerService) {}
+
+  ngOnInit(): void {
+    this.fetchModules();
+    this.fetchUploadedFiles();
+  }
+
+  ngAfterViewInit(): void {
     setTimeout(() => this.updateArrows(), 100);
   }
 
-  scrollLeft() {
+  fetchModules(): void {
+    this.spinner.show();
+    this.http.get<any[]>('http://74.235.189.94:8000/module/latest').subscribe({
+      next: (data) => {
+        this.modules = data;
+        setTimeout(() => this.updateArrows(), 200);
+        // ensure arrows update after view is rendered
+        this.spinner.hide();
+      },
+      error: (error) => {
+        console.error('Failed to fetch modules:', error);
+        this.spinner.hide();
+      }
+    });
+  }
+
+  scrollLeft(): void {
     this.scrollContainer.nativeElement.scrollBy({ left: -320, behavior: 'smooth' });
     setTimeout(() => this.updateArrows(), 350);
   }
 
-  scrollRight() {
+  scrollRight(): void {
     this.scrollContainer.nativeElement.scrollBy({ left: 320, behavior: 'smooth' });
     setTimeout(() => this.updateArrows(), 350);
   }
 
-  onScroll() {
+  onScroll(): void {
     this.updateArrows();
   }
 
-  private updateArrows() {
+  private updateArrows(): void {
     const el = this.scrollContainer.nativeElement;
     const scrollLeft = el.scrollLeft;
     const maxScrollLeft = el.scrollWidth - el.clientWidth;
@@ -127,7 +71,75 @@ export class ModuleCardsComponent {
     this.showRightArrow = scrollLeft < maxScrollLeft - 10;
   }
 
-  OnStartClick() {
-    this.router.navigateByUrl('quiz');
+  fetchUploadedFiles(): void {
+    this.http.get<any>('http://74.235.189.94:8000/file/getAllFiles').subscribe({
+      next: (response: any) => {
+        if (response.success && Array.isArray(response.files)) {
+          this.files = response.files.map((file: any) => ({
+            fileName: file.file_name,
+            description: file.description || 'No description',
+            createdAt: new Date(file['creation time']),
+            updatedAt: new Date(file['last_modified']),
+            createdBy: file.group_name || 'User',
+            downloadLink: file.download_url,
+            fileBlob: null,
+            document_id: file.document_id,
+          }));
+          this.content = [...this.files];
+        }
+      },
+      error: (error : any) => {
+        console.error('Failed to load uploaded files:', error);
+      }
+    });
+  }
+
+  OnStartClick(title: string): void {
+    this.router.navigateByUrl(`/quiz?title=${encodeURIComponent(title)}`);
+  }
+
+  onStartContentClick(fileName: string, document_id: string, status: string): void {
+    // // TODO: Download logic (if needed)
+    // console.log(this.getDownloadUrl(fileName))
+    // this.downloadFile(this.getDownloadUrl(fileName));
+
+    // // ✅ Call the learning tracker API
+    // const apiUrl = `http://74.235.189.94:8000/module/learning/tracker?asset_id=${document_id}`;
+
+    // //if(status.toLocaleLowerCase() != 'in-progress')
+    // {      
+    //   this.http.post(apiUrl, {}).subscribe({
+    //     next: (response) => {
+    //       console.log('Progress updated successfully', response);
+    //       this.fetchModules();
+    //     },
+    //     error: (error) => {
+    //       console.error('Error updating progress', error);
+    //     }
+    //   });
+    // }
+
+    this.OnStartClick(document_id);
+  }
+
+  getDownloadUrl(fileName: string): string | undefined {
+    const matchedFile = this.files.find((file: any) => file.fileName === fileName);
+
+    if (matchedFile) {
+      return matchedFile.downloadLink;
+    } else {
+      console.warn(`No file found for: ${fileName}`);
+      return undefined;
+    }
+  }
+
+  downloadFile(link: any): void {
+    if (link) {
+      window.open(link, '_blank');
+    } else {
+      alert('Download link not available.');
+    }
   }
 }
+
+

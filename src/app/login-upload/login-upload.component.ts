@@ -18,7 +18,7 @@ export class LoginUploadComponent implements AfterViewInit {
   fileDescription: string = '';
   selectedFile: File | null = null;
 
-  groups: string[] = ['Group A', 'Group B', 'Group C'];
+  groups: string[] = ['Group-A', 'Group-B', 'Group-C', 'Shared'];
   displayedColumns: string[] = ['fileName', 'description', 'createdAt', 'updatedAt', 'createdBy', 'actions'];
   dataSource = new MatTableDataSource<any>([]);
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -34,17 +34,18 @@ export class LoginUploadComponent implements AfterViewInit {
 
   fetchUploadedFiles(): void {
     this.spinner.show();
-    this.http.get<any>('http://20.246.73.80:5000/api/files').subscribe({
+    this.http.get<any>('http://74.235.189.94:8000/file/getAllFiles').subscribe({
       next: (response) => {
         if (response.success && Array.isArray(response.files)) {
           const files = response.files.map((file: any) => ({
             fileName: file.file_name,
             description: file.description || 'No description',
-            createdAt: new Date(file['creation time']),
+            createdAt: new Date(file['creation_time']),
             updatedAt: new Date(file['last_modified']),
             createdBy: file.group_name || 'User',
             downloadLink: file.download_url,
             fileBlob: null,
+            groupName : file.container_name,
           }));
 
           // Refresh table with new data
@@ -79,34 +80,51 @@ export class LoginUploadComponent implements AfterViewInit {
 
   upload(fileInput?: HTMLInputElement): void {
     this.spinner.show();
+
     if (this.uploadType === 'file') {
-    if (!this.selectedFile || !this.selectedGroup || !this.fileDescription) {
-      alert('Please select a file, group, and enter description.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', this.selectedFile);
-    formData.append('group_name', this.selectedGroup);
-    formData.append('description', this.fileDescription);
-
-    this.http.post<any>('http://20.246.73.80:5000/api/upload', formData).subscribe({
-      next: (response) => {
-        this.selectedFile = null;
-        this.fileDescription = '';
-        if (fileInput) fileInput.value = '';
-        this.fetchUploadedFiles(); // Refresh the table
+      if (!this.selectedFile || !this.selectedGroup) {
+        alert('Please select a file and group.');
         this.spinner.hide();
-      },
-      error: (err) => {
-        console.error('Upload failed', err);
-        alert('Upload failed. Please try again.');
-        this.spinner.hide();
+        return;
       }
-    });
-  } else if (this.uploadType === 'link') {
+
+      const formData = new FormData();
+
+      // Match curl: send actual file
+      formData.append('file', this.selectedFile, this.selectedFile.name);
+
+      // Match curl: lowercase group, no "grp104-" handling here
+      formData.append('group', this.selectedGroup.toLowerCase());
+
+      // Match curl: qnum = 0
+      formData.append('qnum', '0');
+
+      // Match curl: description is optional, send empty string if not provided
+      formData.append('description', this.fileDescription || '');
+
+      this.http.post<any>('http://74.235.189.94:8000/file/upload', formData, {
+        headers: {
+          accept: 'application/json'
+        }
+      }).subscribe({
+        next: (response) => {
+          this.selectedFile = null;
+          this.fileDescription = '';
+          if (fileInput) fileInput.value = '';
+          this.fetchUploadedFiles(); // Refresh the table      
+        },
+        error: (err) => {
+          console.error('Upload failed', err);
+          alert('Upload failed. Please try again.');
+          this.spinner.hide();
+        }
+      });
+      this.spinner.hide();
+
+    } else if (this.uploadType === 'link') {
       if (!this.uploadedLink) {
         alert('Please enter a valid link.');
+        this.spinner.hide();
         return;
       }
 
@@ -120,10 +138,13 @@ export class LoginUploadComponent implements AfterViewInit {
         fileBlob: null,
       };
 
-      //this.dataSource.data = [...this.dataSource.data, newFile];
+      // TODO: Send newFile to backend if needed
+
       this.uploadedLink = '';
+      this.spinner.hide();
     }
   }
+
 
   editFile(file: any): void {
     console.log('Edit', file);
@@ -131,33 +152,41 @@ export class LoginUploadComponent implements AfterViewInit {
   }
 
   deleteFile(file: any): void {
-  const confirmed = confirm(`Are you sure you want to delete "${file.fileName}"?`);
-  if (!confirmed) return;
+    const confirmed = confirm(`Are you sure you want to delete "${file.fileName}"?`);
+    if (!confirmed) return;
 
-  this.spinner.show();
-  this.http.delete<any>(`http://20.246.73.80:5000/api/files/${encodeURIComponent(file.fileName)}`)
-    .subscribe({
-      next: (response) => {
-        if (response.success) {
-          // Remove the file from table
-          const index = this.dataSource.data.indexOf(file);
-          if (index >= 0) {
-            this.dataSource.data.splice(index, 1);
-            this.dataSource._updateChangeSubscription(); // Refresh the table
-          }
-          alert(`Deleted successfully: ${file.fileName}`);
-          this.spinner.hide();
-        } else {
-          alert(`Failed to delete: ${file.fileName}`);
-          this.spinner.hide();
+  // Remove "grp104-" prefix if present
+  const cleanedGroup = file.groupName.replace(/^grp104-/, '');
+
+  const requestBody = {
+    filename: file.fileName,
+    group: cleanedGroup
+  };
+
+  this.http.delete<any>('http://74.235.189.94:8000/file/delete', {
+    body: requestBody
+  }).subscribe({
+    next: (response) => {
+      this.spinner.show();
+      if (response.success) {
+        const index = this.dataSource.data.indexOf(file);
+        if (index >= 0) {
+          this.dataSource.data.splice(index, 1);
+          this.dataSource._updateChangeSubscription();
         }
-      },
-      error: (err) => {
-        console.error('Delete failed', err);
-        alert(`Delete failed: ${file.fileName}`);
-        this.spinner.hide();
+        alert(`Deleted successfully: ${file.fileName}`);
+      } else {
+        alert(`Failed to delete: ${file.fileName}`);
       }
-    });
+      this.spinner.hide();
+    },
+    error: (err) => {
+      console.error('Delete failed', err);
+      alert(`Delete failed: ${file.fileName}`);
+      this.spinner.hide();
+    }
+  });
+
   }
 
 
